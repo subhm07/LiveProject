@@ -1,3 +1,3 @@
 # LiveProject
 
-## By Shubham(Architect), Farhan(Manager), Kushal(Junior)
+## By Shubham(Witness), Farhan(Manager), Kushal(Pro)
