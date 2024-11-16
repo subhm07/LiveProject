@@ -2,10 +2,27 @@ const express = require("express");
 const app = express();
 const PORT = 8000;
 const users = require("./mockData.json");
-app.get("/", function (req, res) {
-  res.send("Hello World");
-  //   res.return("Port is running");
+const fs = require("fs");
+app.use(express.urlencoded({ extended: false }));
+app.use((req, res, next) => {
+  console.log("Middleware started");
+  next();
 });
+
+//creating a log file
+app.use((req, res, next) => {
+  fs.appendFile(
+    "log.txt",
+    `\n${Date.now()}:${req.method}:${req.path}`,
+    (err, data) => {
+      next();
+    }
+  );
+}),
+  app.get("/", function (req, res) {
+    res.send("Hello World");
+    //   res.return("Port is running");
+  });
 
 app.get("/api/users", (req, res) => {
   return res.json(users);
@@ -33,9 +50,18 @@ app.get("/users/:id", (req, res) => {
      <li>Phone Number : ${userID.phone}</li>
     </ul>
     `;
-  res.send(html);
-  return res.json(userID);
+  return res.send(html);
+  //   return res.json(userID);
 });
+app.post("/users", (req, res) => {
+  const body = req.body;
+  console.log(body);
+  users.push({ ...body, id: users.length + 1 });
+  fs.writeFile("./mockData.json", JSON.stringify(users), (err, data) => {
+    return res.json({ status: "success", id: users.length });
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`Server is connected and running at PORT:${PORT}`);
 });
