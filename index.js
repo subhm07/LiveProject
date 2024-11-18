@@ -3,10 +3,17 @@ const app = express();
 const PORT = 8000;
 const users = require("./mockData.json");
 const fs = require("fs");
+const mongoose = require("mongoose");
 app.use(express.urlencoded({ extended: false }));
+//Db connection
+mongoose
+  .connect(
+    "mongodb+srv://farhandazzler1999:DHaqzXC3KP7aw0LC@backenddb.aw3vz5r.mongodb.net/?retryWrites=true&w=majority&appName=BackendDB"
+  )
+  .then(() => console.log("MongoDB connected"))
+  .catch((err) => console.log("MongoDB err", err));
 app.use((req, res, next) => {
   console.log("Middleware started");
-  next();
 });
 
 //creating a log file
@@ -20,7 +27,9 @@ app.use((req, res, next) => {
   );
 }),
   app.get("/", function (req, res) {
+    res.setHeader("X-MyName", "Mohammad Farhan");
     res.send("Hello World");
+
     //   res.return("Port is running");
   });
 
