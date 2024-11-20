@@ -4,18 +4,44 @@ const PORT = 8000;
 const users = require("./mockData.json");
 const fs = require("fs");
 const mongoose = require("mongoose");
+const bodyParser = require("body-parser");
 app.use(express.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
 //Db connection
 mongoose
   .connect(
-    "mongodb+srv://farhandazzler1999:DHaqzXC3KP7aw0LC@backenddb.aw3vz5r.mongodb.net/?retryWrites=true&w=majority&appName=BackendDB"
+    "mongodb+srv://farhandazzler1999:78nM0wfkvwSjxBWj@cluster0.eb9l4.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
   )
   .then(() => console.log("MongoDB connected"))
-  .catch((err) => console.log("MongoDB err", err));
+  .catch((err) => console.log("MongoDB ERR", err));
 app.use((req, res, next) => {
   console.log("Middleware started");
+  next();
 });
-
+//schema
+const userSchema = new mongoose.Schema({
+  firstName: {
+    type: String,
+    // required: true,
+  },
+  lastName: {
+    type: String,
+  },
+  age: {
+    type: Number,
+  },
+  email: {
+    type: String,
+    // required: true,
+    unique: true,
+  },
+  gender: {
+    type: String,
+    required: true,
+  },
+});
+const User = new mongoose.model("user", userSchema);
 //creating a log file
 app.use((req, res, next) => {
   fs.appendFile(
@@ -62,13 +88,30 @@ app.get("/users/:id", (req, res) => {
   return res.send(html);
   //   return res.json(userID);
 });
-app.post("/users", (req, res) => {
-  const body = req.body;
-  console.log(body);
-  users.push({ ...body, id: users.length + 1 });
-  fs.writeFile("./mockData.json", JSON.stringify(users), (err, data) => {
-    return res.json({ status: "success", id: users.length });
-  });
+app.post("/users", async (req, res) => {
+  try {
+    const body = req.body;
+    console.log(body);
+    //   users.push({ ...body, id: users.length + 1 });
+    //   fs.writeFile("./mockData.json", JSON.stringify(users), (err, data) => {
+    //     return res
+    //       .json({ status: "success", id: users.length })
+    //       .catch((err) => console.log("Err", err));
+    //   });
+
+    const user = await User.create({
+      firstName: body.firstName,
+      lastName: body.lastName,
+      age: body.age,
+      gender: body.gender,
+      email: body.email,
+    });
+    console.log(user);
+    return res.status(201).json({ msg: "success" });
+  } catch (err) {
+    console.error(err);
+    res.status(400).send(err.message);
+  }
 });
 
 app.listen(PORT, () => {
